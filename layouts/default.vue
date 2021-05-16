@@ -13,15 +13,37 @@
           :link="{
             name: 'Dashboard',
             icon: 'tim-icons icon-chart-pie-36',
-            path: '/'
+            path: '/dashboard'
           }"
         >
         </sidebar-item>
 
+        <sidebar-item
+          :link="{
+            name: 'Devices',
+            icon: 'tim-icons icon-chart-pie-36',
+            path: '/devices'
+          }"
+        >
+        </sidebar-item>
 
+        <sidebar-item
+          :link="{
+            name: 'Alarms',
+            icon: 'tim-icons icon-chart-pie-36',
+            path: '/alarms'
+          }"
+        >
+        </sidebar-item>
 
-
-
+        <sidebar-item
+          :link="{
+            name: 'Templates',
+            icon: 'tim-icons icon-chart-pie-36',
+            path: '/templates'
+          }"
+        >
+        </sidebar-item>
 
         <li class="active-pro">
           <a href="https://www.creative-tim.com/product/nuxt-black-dashboard-pro" target="_blank">
