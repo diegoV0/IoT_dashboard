@@ -67,6 +67,9 @@
           ></el-table-column>
           <el-table-column label="Actions">
             <div slot-scope="{ row, $index }">
+              <el-tooltip content="Saver Status Indicator" style="margin-right:10px">
+                <i class="fas fa-database " :class="{'text-success' : row.saverRule, 'text-dark' : !row.saverRule}" ></i>
+              </el-tooltip>
               <el-tooltip content="Database Saver">
                 <base-switch
                   @click="updateSaverRuleStatus($index)"
@@ -97,6 +100,7 @@
         </el-table>
       </card>
     </div>
+    <Json :value="devices"></Json>
   </div>
 </template>
 
@@ -142,8 +146,8 @@ export default {
     deleteDevice(device) {
       alert("DELEING: " + device.name);
     },
-    updateSaverRuleStatus(index){
-        this.devices[index].saverRule = !this.devices[index].saverRule
+    updateSaverRuleStatus(index) {
+      this.devices[index].saverRule = !this.devices[index].saverRule;
     }
   }
 };
