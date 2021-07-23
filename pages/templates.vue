@@ -742,7 +742,7 @@ export default {
         icon: "fa-bath",
         column: "col-6"
       },
-      configButton: {
+      iotButtonConfig: {
         userId: "userid",
         selectedDevice: {
           name: "Home",
