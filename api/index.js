@@ -1,13 +1,81 @@
 //requires
-const express = require('express')
+const express = require("express")
+const morgan = require("morgan")
+const cors = require("cors")
+const mongoose = require("mongoose")
+const colors = require("colors")
 
 //intances
-const app = express();
+const app = express()
+
+//express config
+app.use(morgan("tiny"));
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
+app.use(cors());
+
+//express routes
+app.use("/api1", require("./routes/devices.js"));
+module.exports = app;
 
 //listener
 app.listen(3001, ()=>{
-    console.log("API server listening on port 3001")
+    console.log("API server listening on port 3001");
 })
 
 
-console.log("hello fucking word")
+//Mongo Connection
+const mongoUserName = "user";
+const mongoPassword = "pass123";
+const mongoHost = "localhost";
+const mongoPort = "27017";
+const mongoDatabase = "iot_db";
+
+var uri =
+  "mongodb://" +
+  mongoUserName +
+  ":" +
+  mongoPassword +
+  "@" +
+  mongoHost +
+  ":" +
+  mongoPort +
+  "/" +
+  mongoDatabase;
+
+const options = {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+  authSource: "admin"
+};
+
+try {
+  mongoose.connect(uri, options).then(
+      () => {
+        console.log("\n");
+        console.log("*******************************".green);
+        console.log("✔ Mongo Successfully Connected!".green);
+        console.log("*******************************".green);
+        console.log("\n");
+      },
+      (err) => {
+        console.log("\n");
+        console.log("*******************************".red);
+        console.log("    Mongo Connection Failed    ".red);
+        console.log("*******************************".red);
+        console.log("\n");
+        console.log(err);
+      }
+    );
+} catch (error) {
+  console.log("ERROR CONNECTING MONGO ");
+  console.log(error);
+}
+
+
