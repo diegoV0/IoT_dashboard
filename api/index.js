@@ -20,6 +20,7 @@ app.use(cors());
 
 //express routes
 app.use("/api1", require("./routes/devices.js"));
+app.use("/api1", require("./routes/users.js"));
 module.exports = app;
 
 //listener
