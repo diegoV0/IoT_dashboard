@@ -1,26 +1,18 @@
 const express = require("express");
+const { checkAuth } = require("../middlewares/authentication");
 const router = express.Router();
 
-router.get("/test", (req, res) => {
-  console.log(req.query);
-  var toReturn = {
-    status: "success",
-    data: "HELLO FROM GET"
-  }
-  res.json(toReturn);
-});
 
-router.post("/test", (req, res) => {
-  console.log(req.body);
-  var toReturn = {
-    status: "success",
-    data: "HELLO FRON POST"  
-  }
-  res.json(toReturn);
-});
+/*----------------------------------------------------------
+                        Models Included
+-------------------------------------------------------------*/
+import Device from '../models/device.js';
 
-router.get("/device", (req, res) => {
-  
+/*----------------------------------------------------------
+                           API
+-------------------------------------------------------------*/
+router.get("/device", checkAuth, (req, res) => {
+
 });
 
 router.post("/device", (req, res) => {
@@ -36,5 +28,9 @@ router.delete("/device", (req, res) => {
 router.put("/device", (req, res) => {
   
 });
+
+/*----------------------------------------------------------
+                           Funtions
+-------------------------------------------------------------*/
 
 module.exports = router;
