@@ -695,6 +695,7 @@ import Iotindicator from '../components/Widgets/Iotindicator.vue';
 import Iotswitch from '../components/Widgets/Iotswitch.vue';
 import Rtnumberchart from '../components/Widgets/Rtnumberchart.vue';
 export default {
+  middleware: "authenticated",
   components: {
     Iotbutton,
     Iotindicator,
@@ -805,6 +806,42 @@ export default {
     };
   },
   methods: {
+async saveTemplate() {
+      const axiosHeaders = {
+        headers: {
+          token: this.$store.state.auth.token
+        }
+      };
+      console.log(axiosHeaders)
+      const toSend = {
+        template: {
+          name: this.templateName,
+          description: this.templateDescription,
+          widgets: this.widgets
+        }
+      };
+      
+      try {
+        const res = await this.$axios.post("/template", toSend, axiosHeaders);
+        if (res.data.status == "success") {
+          this.$notify({
+            type: "success",
+            icon: "tim-icons icon-alert-circle-exc",
+            message: "Template created!"
+          });
+          //this.getTemplates();
+        }
+      } catch (error) {
+        this.$notify({
+          type: "danger",
+          icon: "tim-icons icon-alert-circle-exc",
+          message: "Error creating template..."
+        });
+        console.log(error);
+        return;
+      }
+    },
+
     addNewWidget(){
      if (this.widgetType == "numberchart") {
         this.ncConfig.variable = this.makeid(10);
