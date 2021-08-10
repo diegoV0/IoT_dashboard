@@ -53,7 +53,7 @@
         <div>
           <h4 class="card">Devices</h4>
         </div>
-        <el-table :data="devices">
+        <el-table :data="$store.state.devices">
           <el-table-column label="#" min-width="50" aling="center">
             <div slot-scope="{ row, $index }">
               {{ $index + 1 }}
@@ -100,7 +100,7 @@
         </el-table>
       </card>
     </div>
-    <Json :value="devices"></Json>
+    <Json :value="$store.state.devices"></Json>
   </div>
 </template>
 
@@ -109,6 +109,7 @@ import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
 
 export default {
+  middleware: "authenticated",
   components: {
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
@@ -117,30 +118,11 @@ export default {
   },
   data() {
     return {
-      devices: [
-        {
-          name: "Home",
-          dId: "6666",
-          templateName: "Power Sensor",
-          templateId: "qwertyuiop789654123",
-          saverRule: false
-        },
-        {
-          name: "Office",
-          dId: "6666",
-          templateName: "Power Sensor",
-          templateId: "qwertyuiop789654123",
-          saverRule: true
-        },
-        {
-          name: "Farm",
-          dId: "6666",
-          templateName: "Power Sensor",
-          templateId: "qwertyuiop789654123",
-          saverRule: false
-        }
-      ]
+
     };
+  },
+    mounted() {
+    this.$store.dispatch("getDevices");
   },
   methods: {
     deleteDevice(device) {
