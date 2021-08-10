@@ -554,7 +554,11 @@
 
     <!-- DASHBOARD PREVIEW -->
     <div class="row">
-      <div v-for="(widget, index) in widgets" :key="index" :class="[widget.column]">
+      <div
+        v-for="(widget, index) in widgets"
+        :key="index"
+        :class="[widget.column]"
+      >
         <i
           aria-hidden="true"
           class="fa fa-trash text-warning pull-right"
@@ -690,10 +694,10 @@
 <script>
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
-import Iotbutton from '../components/Widgets/Iotbutton.vue';
-import Iotindicator from '../components/Widgets/Iotindicator.vue';
-import Iotswitch from '../components/Widgets/Iotswitch.vue';
-import Rtnumberchart from '../components/Widgets/Rtnumberchart.vue';
+import Iotbutton from "../components/Widgets/Iotbutton.vue";
+import Iotindicator from "../components/Widgets/Iotindicator.vue";
+import Iotswitch from "../components/Widgets/Iotswitch.vue";
+import Rtnumberchart from "../components/Widgets/Rtnumberchart.vue";
 export default {
   middleware: "authenticated",
   components: {
@@ -805,14 +809,41 @@ export default {
       }
     };
   },
+  mounted(){
+    this.getTemplates();
+  },
   methods: {
-async saveTemplate() {
+      //Get Templates
+    async getTemplates() {
       const axiosHeaders = {
         headers: {
           token: this.$store.state.auth.token
         }
       };
-      console.log(axiosHeaders)
+      try {
+        const res = await this.$axios.get("/template", axiosHeaders);
+        console.log(res.data);
+        if (res.data.status == "success") {
+          this.templates = res.data.data;
+        }
+      } catch (error) {
+        this.$notify({
+          type: "danger",
+          icon: "tim-icons icon-alert-circle-exc",
+          message: "Error getting templates..."
+        });
+        console.log(error);
+        return;
+      }
+    },
+
+    async saveTemplate() {
+      const axiosHeaders = {
+        headers: {
+          token: this.$store.state.auth.token
+        }
+      };
+      console.log(axiosHeaders);
       const toSend = {
         template: {
           name: this.templateName,
@@ -820,7 +851,7 @@ async saveTemplate() {
           widgets: this.widgets
         }
       };
-      
+
       try {
         const res = await this.$axios.post("/template", toSend, axiosHeaders);
         if (res.data.status == "success") {
@@ -829,7 +860,7 @@ async saveTemplate() {
             icon: "tim-icons icon-alert-circle-exc",
             message: "Template created!"
           });
-          //this.getTemplates();
+           this.getTemplates();
         }
       } catch (error) {
         this.$notify({
@@ -841,9 +872,8 @@ async saveTemplate() {
         return;
       }
     },
-
-    addNewWidget(){
-     if (this.widgetType == "numberchart") {
+    addNewWidget() {
+      if (this.widgetType == "numberchart") {
         this.ncConfig.variable = this.makeid(10);
         this.widgets.push(JSON.parse(JSON.stringify(this.ncConfig)));
       }
@@ -872,8 +902,8 @@ async saveTemplate() {
       }
       return result;
     },
-    deleteWidget(index){
-      this.widgets.splice(index,1);
+    deleteWidget(index) {
+      this.widgets.splice(index, 1);
     }
   }
 };
