@@ -623,6 +623,7 @@
               class="mb-3 pull-right"
               size="lg"
               @click="saveTemplate()"
+              :disabled="widgets.length == 0"
             >
               Save Template
             </base-button>
@@ -687,7 +688,7 @@
     </div>
 
     <!-- JSONS -->
-    <Json :value="widgets"></Json>
+    <Json :value="templates"></Json>
   </div>
 </template>
 
@@ -809,11 +810,11 @@ export default {
       }
     };
   },
-  mounted(){
+  mounted() {
     this.getTemplates();
   },
   methods: {
-      //Get Templates
+    //Get Templates
     async getTemplates() {
       const axiosHeaders = {
         headers: {
@@ -836,7 +837,6 @@ export default {
         return;
       }
     },
-
     async saveTemplate() {
       const axiosHeaders = {
         headers: {
@@ -860,13 +860,44 @@ export default {
             icon: "tim-icons icon-alert-circle-exc",
             message: "Template created!"
           });
-           this.getTemplates();
+          this.getTemplates();
         }
       } catch (error) {
         this.$notify({
           type: "danger",
           icon: "tim-icons icon-alert-circle-exc",
           message: "Error creating template..."
+        });
+        console.log(error);
+        return;
+      }
+    },
+    async deleteTemplate(template) {
+      const axiosHeaders = {
+        headers: {
+          token: this.$store.state.auth.token
+        },
+        params: {
+          templateId: template._id
+        }
+      };
+      console.log(axiosHeaders);
+      try {
+        const res = await this.$axios.delete("/template", axiosHeaders);
+        if (res.data.status == "success") {
+          this.$notify({
+            type: "success",
+            icon: "tim-icons icon-alert-circle-exc",
+            message: template.name + " was deleted!"
+          });
+
+          this.getTemplates();
+        }
+      } catch (error) {
+        this.$notify({
+          type: "danger",
+          icon: "tim-icons icon-alert-circle-exc",
+          message: "Error getting templates..."
         });
         console.log(error);
         return;
