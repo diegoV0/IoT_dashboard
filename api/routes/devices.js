@@ -7,6 +7,7 @@ const axios = require("axios");
                         Models Included
 -------------------------------------------------------------*/
 import Device from "../models/device.js";
+import SaverRule from "../models/emqx_saver_rule.js";
 
 /*----------------------------------------------------------
                            API
@@ -101,7 +102,7 @@ router.put("/device", (req, res) => {
                            Funtions
 -------------------------------------------------------------*/
 setTimeout(() => {
-  createSaverRule("121212","11111",false);
+  createSaverRule("121212", "11111", false);
 }, 2000);
 
 async function selectDevice(userId, dId) {
@@ -129,27 +130,44 @@ async function selectDevice(userId, dId) {
 
 //create saver rule
 async function createSaverRule(userId, dId, status) {
-  const url = "http://localhost:8085/api/v4/rules";
-  const topic = userId + "/" + dId + "/+/sdata";
-  const rawsql = "SELECT topic, payload FROM \"" + topic + "\" WHERE payload.save = 1";
-  var newRule = {
-    rawsql: rawsql,
-    actions: [
-      {
-        name: "data_to_webserver",
-        params: {
-          $resource: global.saverResource.id,
-          payload_tmpl: '{"userId":"' +  userId + '","payload":${payload},"topic":"${topic}"}'
+  try {
+    const url = "http://localhost:8085/api/v4/rules";
+    const topic = userId + "/" + dId + "/+/sdata";
+    const rawsql =
+      'SELECT topic, payload FROM "' + topic + '" WHERE payload.save = 1';
+    var newRule = {
+      rawsql: rawsql,
+      actions: [
+        {
+          name: "data_to_webserver",
+          params: {
+            $resource: global.saverResource.id,
+            payload_tmpl:
+              '{"userId":"' + userId + '","payload":${payload},"topic":"${topic}"}'
+          }
         }
-      }
-    ],
-    description: "SAVER-RULE",
-    enabled: status
-  };
-  //save rule in emqx - grabamos la regla en emqx
-  const res = await axios.post(url, newRule, auth);
-  if(res.status === 200 && res.data.data){
-    console.log(res.data.data);
+      ],
+      description: "SAVER-RULE",
+      enabled: status
+    };
+    //save rule in emqx - grabamos la regla en emqx
+    const res = await axios.post(url, newRule, auth);
+    if (res.status === 200 && res.data.data) {
+      console.log(res.data.data);
+      await SaverRule.create({
+        userId: userId,
+        dId: dId,
+        emqxRuleId: res.data.data.id,
+        status: status
+      });
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log("Error creating saver rule");
+    console.log(error);
+    return false;
   }
 }
 
