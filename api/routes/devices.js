@@ -123,10 +123,18 @@ async function selectDevice(userId, dId) {
   }
 }
 
-/*
- SAVER RULES FUNCTIONS
-*/
-//get saver rule
+
+ // SAVER RULES FUNCTIONS
+
+//get saver rules
+async function getSaverRules(userId) {
+  try {
+    const rules = await SaverRule.find({ userId: userId });
+    return rules;
+  } catch (error) {
+    return false;
+  }
+}
 
 //create saver rule
 async function createSaverRule(userId, dId, status) {
@@ -172,6 +180,35 @@ async function createSaverRule(userId, dId, status) {
 }
 
 //update saver rule
+async function updateSaverRuleStatus(emqxRuleId, status) {
+  const url = "http://localhost:8085/api/v4/rules/" + emqxRuleId;
+  const newRule = {
+    enabled: status
+  };
+  const res = await axios.put(url, newRule, auth);
+  if (res.status === 200 && res.data.data) {
+    await SaverRule.updateOne({ emqxRuleId: emqxRuleId }, { status: status });
+    console.log("Saver Rule Status Updated...".green);
+    return {
+      status: "success",
+      action: "updated"
+    };
+  }
+}
 
 //delete saver rule
+async function deleteSaverRule(dId) {
+  try {
+    const mongoRule = await SaverRule.findOne({ dId: dId });
+    const url = "http://localhost:8085/api/v4/rules/" + mongoRule.emqxRuleId;
+    const emqxRule = await axios.delete(url, auth);
+    const deleted = await SaverRule.deleteOne({ dId: dId });
+    return true;
+  } catch (error) {
+    console.log("Error deleting saver rule");
+    console.log(error);
+    return false;
+  }
+}
+
 module.exports = router;
