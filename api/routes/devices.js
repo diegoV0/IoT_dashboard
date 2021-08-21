@@ -1,6 +1,7 @@
 const express = require("express");
 const { checkAuth } = require("../middlewares/authentication");
 const router = express.Router();
+const axios = require("axios");
 
 /*----------------------------------------------------------
                         Models Included
@@ -10,6 +11,13 @@ import Device from "../models/device.js";
 /*----------------------------------------------------------
                            API
 -------------------------------------------------------------*/
+const auth = {
+  auth: {
+    username: "admin",
+    password: "emqxsecret"
+  }
+};
+
 router.get("/device", checkAuth, async (req, res) => {
   try {
     const userId = req.userData._id;
@@ -92,6 +100,10 @@ router.put("/device", (req, res) => {
 /*----------------------------------------------------------
                            Funtions
 -------------------------------------------------------------*/
+setTimeout(() => {
+  createSaverRule("121212","11111",false);
+}, 2000);
+
 async function selectDevice(userId, dId) {
   try {
     const result = await Device.updateMany(
@@ -110,4 +122,38 @@ async function selectDevice(userId, dId) {
   }
 }
 
+/*
+ SAVER RULES FUNCTIONS
+*/
+//get saver rule
+
+//create saver rule
+async function createSaverRule(userId, dId, status) {
+  const url = "http://localhost:8085/api/v4/rules";
+  const topic = userId + "/" + dId + "/+/sdata";
+  const rawsql = "SELECT topic, payload FROM \"" + topic + "\" WHERE payload.save = 1";
+  var newRule = {
+    rawsql: rawsql,
+    actions: [
+      {
+        name: "data_to_webserver",
+        params: {
+          $resource: global.saverResource.id,
+          payload_tmpl: '{"userId":"' +  userId + '","payload":${payload},"topic":"${topic}"}'
+        }
+      }
+    ],
+    description: "SAVER-RULE",
+    enabled: status
+  };
+  //save rule in emqx - grabamos la regla en emqx
+  const res = await axios.post(url, newRule, auth);
+  if(res.status === 200 && res.data.data){
+    console.log(res.data.data);
+  }
+}
+
+//update saver rule
+
+//delete saver rule
 module.exports = router;
