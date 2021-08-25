@@ -19,6 +19,7 @@ const auth = {
   }
 };
 
+//GET DEVICES
 router.get("/device", checkAuth, async (req, res) => {
   try {
     const userId = req.userData._id;
@@ -56,7 +57,7 @@ router.post("/device", checkAuth, async (req, res) => {
 
     const device = await Device.create(newDevice);
 
-    await createSaverRule(userId, newDevice.dId, false);
+    await createSaverRule(userId, newDevice.dId, true);
 
     await selectDevice(userId, newDevice.dId);
     const toSend = {
@@ -74,11 +75,12 @@ router.post("/device", checkAuth, async (req, res) => {
   }
 });
 
+//DELETE DEVICE
 router.delete("/device", checkAuth, async (req, res) => {
   try {
     const userId = req.userData._id;
     const dId = req.query.dId;
-    console.log(dId);
+    await deleteSaverRule(dId);
     const result = await Device.deleteOne({ userId: userId, dId: dId });
     const toSend = {
       status: "success",
@@ -96,6 +98,7 @@ router.delete("/device", checkAuth, async (req, res) => {
   }
 });
 
+//UPDATE DEVICES
 router.put("/device", (req, res) => {
   const dId = req.body.dId;
   console.log(req.userData._id);
@@ -112,12 +115,20 @@ router.put("/device", (req, res) => {
   }
 });
 
+//SAVER-RULE STATUS UPDATER
+router.put('/saver-rule', checkAuth, async (req, res) => {
+  const rule = req.body.rule;
+  console.log(rule)
+  await updateSaverRuleStatus(rule.emqxRuleId, rule.status)
+  const toSend = {
+    status: "success"
+  };
+  res.json(toSend);
+});
+
 /*----------------------------------------------------------
                            Funtions
 -------------------------------------------------------------*/
-setTimeout(() => {
-  createSaverRule("121212", "11111", false);
-}, 2000);
 
 async function selectDevice(userId, dId) {
   try {
