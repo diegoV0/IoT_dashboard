@@ -22,7 +22,14 @@ const auth = {
 router.get("/device", checkAuth, async (req, res) => {
   try {
     const userId = req.userData._id;
-    const devices = await Device.find({ userId: userId });
+    //get devices
+    var devices = await Device.find({ userId: userId });
+    devices = JSON.parse(JSON.stringify(devices));
+    //get saver rules
+    const saverRules = await getSaverRules(userId);
+    devices.forEach((device, index) => {
+      devices[index].saverRule = saverRules.filter(saverRule => saverRule.dId == device.dId)[0];
+    });
     const toSend = {
       status: "success",
       data: devices
@@ -43,10 +50,15 @@ router.post("/device", checkAuth, async (req, res) => {
   try {
     const userId = req.userData._id;
     var newDevice = req.body.newDevice;
+
     newDevice.userId = userId;
     newDevice.createdTime = Date.now();
+
     const device = await Device.create(newDevice);
-    createSaverRule(userId, newDevice.dId, true);
+
+    await createSaverRule(userId, newDevice.dId, false);
+
+    await selectDevice(userId, newDevice.dId);
     const toSend = {
       status: "success"
     };
