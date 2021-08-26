@@ -51,14 +51,10 @@ router.post("/device", checkAuth, async (req, res) => {
   try {
     const userId = req.userData._id;
     var newDevice = req.body.newDevice;
-
     newDevice.userId = userId;
     newDevice.createdTime = Date.now();
-
-    const device = await Device.create(newDevice);
-
     await createSaverRule(userId, newDevice.dId, true);
-
+    const device = await Device.create(newDevice);
     await selectDevice(userId, newDevice.dId);
     const toSend = {
       status: "success"

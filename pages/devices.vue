@@ -262,18 +262,12 @@ export default {
         }
       };
       //ESCRIBIMOS EL NOMBRE Y EL ID DEL TEMPLATE SELECCIONADO EN EL OBJETO newDevice
-      this.newDevice.templateId = this.templates[
-        this.selectedIndexTemplate
-      ]._id;
-      this.newDevice.templateName = this.templates[
-        this.selectedIndexTemplate
-      ].name;
+      this.newDevice.templateId = this.templates[this.selectedIndexTemplate]._id;
+      this.newDevice.templateName = this.templates[this.selectedIndexTemplate].name;
       const toSend = {
         newDevice: this.newDevice
       };
-      this.$axios
-        .post("/device", toSend, axiosHeaders)
-        .then(res => {
+      this.$axios.post("/device", toSend, axiosHeaders).then(res => {
           if (res.data.status == "success") {
             this.$store.dispatch("getDevices");
             this.newDevice.name = "";
