@@ -8,6 +8,7 @@ const axios = require("axios");
 -------------------------------------------------------------*/
 import Device from "../models/device.js";
 import SaverRule from "../models/emqx_saver_rule.js";
+import Template from "../models/template.js";
 
 /*----------------------------------------------------------
                            API
@@ -29,9 +30,12 @@ router.get("/device", checkAuth, async (req, res) => {
     devices = JSON.parse(JSON.stringify(devices));
     //get saver rules
     const saverRules = await getSaverRules(userId);
+    //get templates
+    const templates = await getTemplates(userId);
     //saver rules to -> devices
     devices.forEach((device, index) => {
       devices[index].saverRule = saverRules.filter(saverRule => saverRule.dId == device.dId)[0];
+      devices[index].template = templates.filter(template => template._id == device.templateId);
     });
     const toSend = {
       status: "success",
@@ -96,11 +100,12 @@ router.delete("/device", checkAuth, async (req, res) => {
   }
 });
 
-//UPDATE DEVICES
-router.put("/device", (req, res) => {
+//UPDATE DEVICES (SELECTOR)
+router.put("/device", async (req, res) => {
   const dId = req.body.dId;
+  const userId = req.userData._id;
   console.log(req.userData._id);
-  if (selectDevice(userId, dId)) {
+  if (await selectDevice(userId, dId)) {
     const toSend = {
       status: "success"
     };
@@ -127,7 +132,6 @@ router.put('/saver-rule', checkAuth, async (req, res) => {
 /*----------------------------------------------------------
                            Funtions
 -------------------------------------------------------------*/
-
 async function selectDevice(userId, dId) {
   try {
     const result = await Device.updateMany(
@@ -148,6 +152,16 @@ async function selectDevice(userId, dId) {
 
 
  // SAVER RULES FUNCTIONS
+
+//get templates from a user
+async function getTemplates(userId) {
+  try {
+    const templates = await Template.find({ userId: userId });
+    return templates;
+  } catch (error) {
+    return false;
+  }
+}
 
 //get saver rules
 async function getSaverRules(userId) {
