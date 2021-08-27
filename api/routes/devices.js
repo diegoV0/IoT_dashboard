@@ -25,9 +25,11 @@ router.get("/device", checkAuth, async (req, res) => {
     const userId = req.userData._id;
     //get devices
     var devices = await Device.find({ userId: userId });
+    //mongoose array to js array
     devices = JSON.parse(JSON.stringify(devices));
     //get saver rules
     const saverRules = await getSaverRules(userId);
+    //saver rules to -> devices
     devices.forEach((device, index) => {
       devices[index].saverRule = saverRules.filter(saverRule => saverRule.dId == device.dId)[0];
     });

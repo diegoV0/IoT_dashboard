@@ -73,7 +73,7 @@
 
         <el-table :data="$store.state.devices">
           <el-table-column label="#" min-width="50" align="center">
-            <div slot-scope="{ row, $index }">
+            <div slot-scope="{ $index }">
               {{ $index + 1 }}
             </div>
           </el-table-column>
