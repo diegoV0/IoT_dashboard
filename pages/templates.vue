@@ -4,7 +4,7 @@
     <div class="row">
       <card>
         <div slot="header">
-          <h4 class="card-title">Widgets</h4>
+          <h4 class="card-title">Widgets {{iotIndicatorConfig.column}}</h4>
         </div>
 
         <div class="row">
@@ -588,8 +588,8 @@
       </div>
     </div>
 
-    <!-- SAVE TEMPLATE-->
-    <div class="row">
+    <!-- SAVE TEMPLATE FORM-->
+    <div class="row" >
       <card>
         <div slot="header">
           <h4 class="card-title">Save Template</h4>
@@ -688,24 +688,16 @@
     </div>
 
     <!-- JSONS -->
-    <Json :value="templates"></Json>
+    <Json :value="widgets"></Json>
   </div>
 </template>
 
 <script>
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
-import Iotbutton from "../components/Widgets/Iotbutton.vue";
-import Iotindicator from "../components/Widgets/Iotindicator.vue";
-import Iotswitch from "../components/Widgets/Iotswitch.vue";
-import Rtnumberchart from "../components/Widgets/Rtnumberchart.vue";
 export default {
   middleware: "authenticated",
   components: {
-    Iotbutton,
-    Iotindicator,
-    Iotswitch,
-    Rtnumberchart,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
     [Option.name]: Option,
@@ -748,7 +740,7 @@ export default {
         icon: "fa-bath",
         column: "col-6"
       },
-      iotButtonConfig: {
+      configButton: {
         userId: "userid",
         selectedDevice: {
           name: "Home",
@@ -787,7 +779,7 @@ export default {
         variableFullName: "Pump",
         variable: "var1",
         icon: "fa-sun",
-        column: "col-6",
+        column: "col-4",
         widget: "indicator",
         class: "danger",
         message: "{'fanstatus': 'stop'}"
@@ -837,6 +829,7 @@ export default {
         return;
       }
     },
+    //Save Template
     async saveTemplate() {
       const axiosHeaders = {
         headers: {
@@ -851,7 +844,6 @@ export default {
           widgets: this.widgets
         }
       };
-
       try {
         const res = await this.$axios.post("/template", toSend, axiosHeaders);
         if (res.data.status == "success") {
@@ -872,13 +864,15 @@ export default {
         return;
       }
     },
+    //Delete Template
     async deleteTemplate(template) {
+      
       const axiosHeaders = {
         headers: {
           token: this.$store.state.auth.token
         },
-        params: {
-          templateId: template._id
+        params:{
+          templateId:template._id
         }
       };
       console.log(axiosHeaders);
@@ -890,7 +884,7 @@ export default {
             icon: "tim-icons icon-alert-circle-exc",
             message: template.name + " was deleted!"
           });
-
+          
           this.getTemplates();
         }
       } catch (error) {
@@ -903,6 +897,7 @@ export default {
         return;
       }
     },
+    //Add Widget
     addNewWidget() {
       if (this.widgetType == "numberchart") {
         this.ncConfig.variable = this.makeid(10);
@@ -917,9 +912,13 @@ export default {
         this.widgets.push(JSON.parse(JSON.stringify(this.configButton)));
       }
       if (this.widgetType == "indicator") {
-        this.configIndicator.variable = this.makeid(10);
-        this.widgets.push(JSON.parse(JSON.stringify(this.configIndicator)));
+        this.iotIndicatorConfig.variable = this.makeid(10);
+        this.widgets.push(JSON.parse(JSON.stringify(this.iotIndicatorConfig)));
       }
+    },
+    //Delete Widget
+    deleteWidget(index) {
+      this.widgets.splice(index, 1);
     },
     makeid(length) {
       var result = "";
@@ -932,9 +931,6 @@ export default {
         );
       }
       return result;
-    },
-    deleteWidget(index) {
-      this.widgets.splice(index, 1);
     }
   }
 };

@@ -2,6 +2,7 @@
   <div>
     <!-- FORM ADD DEVICE -->
     <div class="row">
+      <Json :value="$store.state.selectedDevice.name"></Json>
       <card>
         <div slot="header">
           <h4 class="card-title">Add new Device</h4>
@@ -167,6 +168,7 @@ export default {
   },
   methods: {
     updateSaverRuleStatus(rule) {
+      
       var ruleCopy = JSON.parse(JSON.stringify(rule));
       ruleCopy.status = !ruleCopy.status;
       const toSend = { 
