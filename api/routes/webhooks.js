@@ -2,11 +2,14 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 const colors = require("colors");
+var mqtt = require('mqtt');
+var client;
 
 import Data from "../models/data.js";
 import Device from "../models/device.js";
 import Notification from "../models/notification.js";
 import AlarmRule from "../models/emqx_alarm_rule.js";
+
 
 router.post("/saver-webhook", async (req, res) => {
     try {
@@ -49,11 +52,13 @@ router.post("/alarm-webhook", async (req, res) => {
           if (lastNotif == 0){
             console.log("FIRST TIME ALARM");
             saveNotifToMongo(incomingAlarm);
+            sendMqttNotif(incomingAlarm);
           }else{
             const lastNotifToNowMins = ( Date.now() - lastNotif[0].time ) / 1000 / 60;
             if (lastNotifToNowMins > incomingAlarm.triggerTime){
                 console.log("TRIGGERED");
                 saveNotifToMongo(incomingAlarm);
+                sendMqttNotif(incomingAlarm);
             }
           }
     } catch (error) {
@@ -77,5 +82,44 @@ async function updateAlarmCounter(emqxRuleId) {
         console.log(error)
     }
 }
+
+function startMqttClient(){
+    const options = {
+        port: 1883,
+        host: 'localhost',
+        clientId: 'webhook_superuser' + Math.round(Math.random() * (0 - 10000) * -1),
+        username: 'superuser',
+        password: 'pass123',
+        keepalive: 60,
+        reconnectPeriod: 5000,
+        protocolId: 'MQIsdp',
+        protocolVersion: 3,
+        clean: true,
+        encoding: 'utf8'
+    }
+    client = mqtt.connect ('mqtt://' + 'localhost', options);
+    client.on('connect', function () {
+        console.log("MQTT CONNECTION -> SUCCESS;".green);
+        console.log("\n");
+    });
+    client.on('reconnect', (error) => {
+        console.log('RECONNECTING MQTT');
+        console.log(error)
+    });
+    client.on('error', (error) => {
+        console.log("MQTT CONNECIONT FAIL -> ");
+        console.log(error)
+    });
+}
+
+function sendMqttNotif(notif){
+    const topic = notif.userId + '/dummy-did/dummy-var/notif';
+    const msg = 'The rule: when the ' + notif.variableFullName + ' is ' + notif.condition + ' than ' + notif.value;
+    client.publish(topic, msg);
+}
+
+setTimeout(() => {
+    startMqttClient();
+}, 3000);
 
 module.exports = router;
