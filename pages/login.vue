@@ -70,9 +70,7 @@ export default {
   },
   methods: {
         login() {
-      this.$axios
-        .post("/login", this.user)
-        .then(res => {
+      this.$axios.post("/login", this.user).then(res => {
           //success! - Usuario creado.
           if (res.data.status == "success") {
             this.$notify({

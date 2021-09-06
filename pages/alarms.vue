@@ -110,7 +110,7 @@
               label="Var Name"
             ></el-table-column>
 
-            <el-table-column prop="variable" label="Variable"></el-table-column>
+            <el-table-column prop="variable" label="Var"></el-table-column>
 
             <el-table-column
               prop="condition"
@@ -126,7 +126,7 @@
 
             <el-table-column prop="counter" label="Matches"></el-table-column>
 
-            <el-table-column header-align="right" align="right" label="Actions">
+            <el-table-column min-width="110" header-align="right" align="right" label="Actions">
               <div
                 slot-scope="{ row, $index }"
                 class="text-right table-actions"
@@ -193,6 +193,7 @@ export default {
       selectedWidgetIndex: null,
       newRule: {
         dId: null,
+        deviceName: null,
         status: true,
         variableFullName: null,
         variable: null,
@@ -212,7 +213,9 @@ export default {
           emqxRuleId: rule.emqxRuleId
         }
       };
-      this.$axios.delete("/alarm-rule", axiosHeaders).then(res => {
+      this.$axios
+        .delete("/alarm-rule", axiosHeaders)
+        .then(res => {
            if (res.data.status == "success") {
             this.$notify({
               type: "success",
@@ -242,7 +245,9 @@ export default {
       var ruleCopy = JSON.parse(JSON.stringify(rule));
       ruleCopy.status = !ruleCopy.status;
       const toSend = { rule: ruleCopy };
-      this.$axios.put("/alarm-rule", toSend, axiosHeaders).then(res => {
+      this.$axios
+        .put("/alarm-rule", toSend, axiosHeaders)
+        .then(res => {
           if (res.data.status == "success") {
             this.$notify({
               type: "success",
@@ -297,6 +302,7 @@ export default {
         return;
       }
       this.newRule.dId = this.$store.state.selectedDevice.dId;
+      this.newRule.deviceName = this.$store.state.selectedDevice.name;
       this.newRule.variableFullName = this.$store.state.selectedDevice.template.widgets[
         this.selectedWidgetIndex
       ].variableFullName;

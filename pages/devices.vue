@@ -135,7 +135,8 @@
       </card>
     </div>
     <Json :value="$store.state.selectedDevice"></Json>
-    <Json :value="$store.state.devices"></Json>
+    <!-- <Json :value="$store.state.devices"></Json>
+    <Json :value="$store.state.notifications"></Json> -->
   </div>
 </template>
 

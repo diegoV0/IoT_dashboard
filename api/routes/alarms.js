@@ -28,7 +28,8 @@ router.post('/alarm-rule', checkAuth, async (req, res) => {
     newRule.userId = req.userData._id;
     var r = await createAlarmRule(newRule);
     if (r) {
-        const response = {
+
+      const response = {
             status: "success",
         }
         return res.json(response);
@@ -74,6 +75,7 @@ router.delete('/alarm-rule', checkAuth, async (req, res) => {
     }
 });
 
+
 /* 
 ______ _   _ _   _ _____ _____ _____ _____ _   _  _____ 
 |  ___| | | | \ | /  __ \_   _|_   _|  _  | \ | |/  ___|
@@ -101,12 +103,13 @@ async function createAlarmRule(newAlarm) {
         description: "ALARM-RULE",
         enabled: newAlarm.status
     }
+
     //save rule in emqx - grabamos la regla en emqx
     const res = await axios.post(url, newRule, auth);
     var emqxRuleId = res.data.data.id;
     console.log(res.data.data);
     if (res.data.data && res.status === 200) {
-        //save rule in mongo -- grabamos regla en mongo
+        //save rule in mongo -- grabamos regla en mongo 
         const mongoRule = await AlarmRule.create({
             userId: newAlarm.userId,
             dId: newAlarm.dId,
@@ -120,12 +123,13 @@ async function createAlarmRule(newAlarm) {
             createTime: Date.now()
         });
         const url = "http://localhost:8085/api/v4/rules/" + mongoRule.emqxRuleId;
-        const payload_templ = '{"userId":"' + newAlarm.userId + '","dId":"' + newAlarm.dId + '","payload":${payload},"topic":"${topic}","emqxRuleId":"' + mongoRule.emqxRuleId + '","value":' + newAlarm.value + ',"condition":"' + newAlarm.condition + '","variable":"' + newAlarm.variable + '","variableFullName":"' + newAlarm.variableFullName + '","triggerTime":' + newAlarm.triggerTime + '}';
+        const payload_templ = '{"userId":"' + newAlarm.userId + '","dId":"' + newAlarm.dId + '","deviceName":"' + newAlarm.deviceName + '","payload":${payload},"topic":"${topic}","emqxRuleId":"' + mongoRule.emqxRuleId + '","value":' + newAlarm.value + ',"condition":"' + newAlarm.condition + '","variable":"' + newAlarm.variable + '","variableFullName":"' + newAlarm.variableFullName + '","triggerTime":' + newAlarm.triggerTime + '}';      
         newRule.actions[0].params.payload_tmpl = payload_templ;
         const res = await axios.put(url, newRule, auth);
         console.log("New Alarm Rule Created...".green);
-        return true;
+        return true;  
     }
+
 }
 
 //UPDATE ALARM STATUS
@@ -136,6 +140,7 @@ async function updateAlarmRuleStatus(emqxRuleId, status) {
     }
     const res = await axios.put(url, newRule, auth);
     if (res.data.data && res.status === 200) {
+
         await AlarmRule.updateOne({ emqxRuleId: emqxRuleId }, { status: status });
         console.log("Saver Rule Status Updated...".green);
         return true;
@@ -154,6 +159,5 @@ async function deleteAlarmRule(emqxRuleId) {
         return false;
     }
 }
-
 
 module.exports = router;
