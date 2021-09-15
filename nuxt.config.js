@@ -59,9 +59,7 @@ export default {
     '@nuxtjs/axios',
     'nuxt-highcharts',
   ],
-
-
-
+  
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
     baseURL: "http://127.0.0.1:3001/api"

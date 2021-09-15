@@ -49,7 +49,7 @@
           <p class="d-lg-none">New Notifications</p>
         </template>
 
-        <li @click="notificationReaded(notification._id)" v-for="(notification, index) in $store.state.notifications" :key="index" class="nav-link">
+        <li @click="notificationReaded(notification._id)" v-for="notification in $store.state.notifications" class="nav-link">
           <a href="#" class="nav-item dropdown-item">
             <b style="color:orangered">{{ unixToDate(notification.time)}}</b>
               <div style="margin-left:50px">

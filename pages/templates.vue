@@ -695,9 +695,11 @@
 <script>
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
+import Rtnumberchart from '~/components/Widgets/Rtnumberchart.vue'
 export default {
   middleware: "authenticated",
   components: {
+    Rtnumberchart,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
     [Option.name]: Option,

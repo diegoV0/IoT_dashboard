@@ -26,11 +26,11 @@ export const mutations = {
 };
 
 export const actions = {
-
   readToken() {
     let auth = null;
     try {
       auth = JSON.parse(localStorage.getItem("auth"));
+      console.log(auth);
     } catch (error) {
       console.log(err);
     }
@@ -39,17 +39,14 @@ export const actions = {
   },
 
   getDevices() {
-
     const axiosHeader = {
       headers: {
         token: this.state.auth.token
       }
     };
 
-    this.$axios.get("/device", axiosHeader)
-    .then(res => {
+    this.$axios.get("/device", axiosHeader).then(res => {
       console.log(res.data.data);
-
       res.data.data.forEach((device, index) => {
         if (device.selected){
           this.commit("setSelectedDevice", device);
