@@ -696,10 +696,13 @@
 import { Table, TableColumn } from "element-ui";
 import { Select, Option } from "element-ui";
 import Rtnumberchart from '~/components/Widgets/Rtnumberchart.vue'
+import Iotbutton from '~/components/Widgets/Iotbutton.vue'
+import Iotindicator from '~/components/Widgets/Iotindicator.vue'
+import Iotswitch from '~/components/Widgets/Iotswitch.vue'
 export default {
   middleware: "authenticated",
   components: {
-    Rtnumberchart,
+    Rtnumberchart, Iotbutton, Iotindicator, Iotswitch,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
     [Option.name]: Option,
@@ -782,26 +785,10 @@ export default {
         variable: "var1",
         icon: "fa-sun",
         column: "col-4",
-        widget: "indicator",
+        widget: "button",
         class: "danger",
         message: "{'fanstatus': 'stop'}"
       },
-      configIndicator: {
-        userId: "userid",
-        selectedDevice: {
-          name: "Home",
-          dId: "8888",
-          templateName: "Power Sensor",
-          templateId: "984237562348756ldksjfh",
-          saverRule: false
-        },
-        variableFullName: "Pump",
-        variable: "var1",
-        icon: "fa-sun",
-        column: "col-6",
-        widget: "indicator",
-        class: "success"
-      }
     };
   },
   mounted() {

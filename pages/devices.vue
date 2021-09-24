@@ -2,7 +2,6 @@
   <div>
     <!-- FORM ADD DEVICE -->
     <div class="row">
-      <Json :value="$store.state.selectedDevice"></Json>
       <card>
         <div slot="header">
           <h4 class="card-title">Add new Device</h4>

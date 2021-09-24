@@ -12,8 +12,13 @@
       style="font-size: 30px"
     ></i>
 
-    <base-button  @click="sendValue()" :type="config.class" class="mb-3 pull-right" size="lg">Add</base-button>
-
+    <base-button
+      @click="sendValue()"
+      :type="config.class"
+      class="mb-3 pull-right"
+      size="lg"
+      >{{ config.text }}</base-button
+    >
   </card>
 </template>
 
@@ -22,32 +27,36 @@ export default {
   props: ["config"],
   data() {
     return {
-      sending: false,
+      sending: false
     };
   },
 
-  mounted() {
- 
-  },
+  mounted() {},
 
   methods: {
     sendValue() {
-        this.sending = true;
-        setTimeout(() => {
-            this.sending = false;
-        }, 500);
-        
-        const toSend = {
-            topic: this.config.userId + "/" + this.config.selectedDevice.dId + "/" + this.config.variable + "/actdata",
-            msg: {
-                value: this.config.message
-            }
-        };
+      this.sending = true;
+      setTimeout(() => {
+        this.sending = false;
+      }, 500);
 
-        console.log(toSend);
-        this.$nuxt.$emit('mqtt-sender', toSend);
+      const toSend = {
+        topic:
+          this.config.userId +
+          "/" +
+          this.config.selectedDevice.dId +
+          "/" +
+          this.config.variable +
+          "/actdata",
+        msg: {
+          value: this.config.message
+        }
+      };
+
+      console.log(toSend);
+      this.$nuxt.$emit("mqtt-sender", toSend);
     },
-   
+
     getIconColorClass() {
       if (!this.sending) {
         return "text-dark";

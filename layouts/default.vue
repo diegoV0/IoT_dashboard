@@ -118,6 +118,9 @@
         return this.$route.path === '/maps/full-screen'
       }
     },
+    beforeDestroy(){
+      this.$nuxt.$off("mqtt-sender");
+    },
     methods: {
       startMqttClient() {
       const options = {
@@ -181,11 +184,18 @@
             this.$store.dispatch("getNotifications");
             return;
           }else if (msgType == "sdata"){
+            $nuxt.$emit(topic, JSON.parse(message.toString()));
+            return;
           }
         } catch (error) {
           console.log(error);
         } 
       });
+
+      $nuxt.$on('mqtt-sender', (toSend) => {
+        this.client.publish(toSend.topic, JSON.stringify(toSend.msg));
+      });
+    
     },
 
       toggleSidebar() {
@@ -208,6 +218,7 @@
         }
       }
     },
+
     mounted() {
       this.$store.dispatch("getNotifications");
       this.initScrollbar();
