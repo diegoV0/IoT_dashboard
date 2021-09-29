@@ -8,6 +8,49 @@ const { checkAuth } = require("../middlewares/authentication.js");
 import User from "../models/user.js";
 import EmqxAuthRule from "../models/emqx_auth.js";
 
+//POST -> req.body
+//GET -> req.query
+
+//LOGIN
+router.post("/login", async (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  var user = await User.findOne({ email: email });
+
+  //if no email
+  if (!user) {
+    const toSend = {
+      status: "error",
+      error: "Invalid Credentials"
+    };
+    return res.status(401).json(toSend);
+  }
+
+  //if email and email ok
+  if (bcrypt.compareSync(password, user.password)) {
+    user.set("password", undefined, { strict: false });
+
+    const token = jwt.sign({ userData: user }, "securePasswordHere", {
+      expiresIn: 60 * 60 * 24 * 30
+    });
+
+    const toSend = {
+      status: "success",
+      token: token,
+      userData: user
+    };
+
+    return res.json(toSend);
+  } else {
+    const toSend = {
+      status: "error",
+      error: "Invalid Credentials"
+    };
+    return res.status(401).json(toSend);
+  }
+});
+
 //REGISTER
 router.post("/register", async (req, res) => {
   try {
@@ -21,53 +64,28 @@ router.post("/register", async (req, res) => {
       email: email,
       password: encryptedPassword
     };
+
     var user = await User.create(newUser);
+
+    console.log(user);
 
     const toSend = {
       status: "success"
     };
-    res.json(toSend);
+
+    res.status(200).json(toSend);
   } catch (error) {
-    console.log("XXXXX ERROR XXXXX");
+    console.log("ERROR - REGISTER ENDPOINT");
     console.log(error);
+
     const toSend = {
       status: "error",
       error: error
     };
-    res.status(500).json(toSend);
-  }
-});
 
-//LOGIN
-router.post("/login", async (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+    console.log(toSend);
 
-  var user = await User.findOne({ email: email });
-  if (!user) {
-    const toSend = {
-      status: "error",
-      error: "Invalid Credentials"
-    };
-    return res.status(401).json(toSend);
-  }
-  if (bcrypt.compareSync(password, user.password)) {
-    user.set("password", undefined, { strict: false });
-    const token = jwt.sign({ userData: user }, "securePassWordHere", {
-      expiresIn: 60 * 60 * 24 * 30
-    });
-    const toSend = {
-      status: "success",
-      token: token,
-      userData: user
-    };
-    return res.json(toSend);
-  } else {
-    const toSend = {
-      status: "error",
-      error: "Invalid Credentials"
-    };
-    return res.status(401).json(toSend);
+    return res.status(500).json(toSend);
   }
 });
 
@@ -75,13 +93,29 @@ router.post("/login", async (req, res) => {
 router.post("/getmqttcredentials", checkAuth, async (req, res) => {
   try {
     const userId = req.userData._id;
+
     const credentials = await getWebUserMqttCredentials(userId);
-    res.json(credentials);
+
+    const toSend = {
+      status: "success",
+      username: credentials.username,
+      password: credentials.password
+    };
+
+    res.json(toSend);
+
+    setTimeout(() => {
+      getWebUserMqttCredentials(userId);
+    }, 5000);
+
+    return;
   } catch (error) {
     console.log(error);
+
     const toSend = {
       status: "error"
     };
+
     return res.status(500).json(toSend);
   }
 });
@@ -109,6 +143,7 @@ async function getWebUserMqttCredentials(userId) {
         username: result.username,
         password: result.password
       };
+
       return toReturn;
     }
 
@@ -131,8 +166,8 @@ async function getWebUserMqttCredentials(userId) {
 
     if (result.n == 1 && result.ok == 1) {
       return {
-        mqttUsername: newUserName,
-        mqttPassword: newPassword
+        username: newUserName,
+        password: newPassword
       };
     } else {
       return false;
@@ -153,18 +188,5 @@ function makeid(length) {
   }
   return result;
 }
-
-router.get("/new-user", async (req, res) => {
-  try {
-    const user = await User.create({
-      name: "diegovo web dev",
-      email: "diego_dev@hotmail.com",
-      password: "mortadela123"
-    });
-    res.json({ status: "success" });
-  } catch (error) {
-    res.json({ status: "fail" });
-  }
-});
 
 module.exports = router;
