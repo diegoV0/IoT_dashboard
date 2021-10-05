@@ -126,7 +126,9 @@ export default {
   mounted() {
     this.$store.dispatch("getNotifications");
     this.initScrollbar();
-    this.startMqttClient();
+    setTimeout(() => {
+      this.startMqttClient();
+    }, 2000);
   },
   beforeDestroy() {
     this.$nuxt.$off("mqtt-sender");
@@ -153,6 +155,27 @@ export default {
         console.log(error);
       }
     },
+    async getMqttCredentialsForReconnection() {
+      try {
+        const axiosHeaders = {
+          headers: {
+            token: this.$store.state.auth.token
+          }
+        };
+        const credentials = await this.$axios.post(
+          "/getmqttcredentialsforreconnection",
+          null,
+          axiosHeaders
+        );
+        console.log(credentials.data);
+        if (credentials.data.status == "success") {
+          this.client.options.username = credentials.data.username;
+          this.client.options.password = credentials.data.password;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
     async startMqttClient() {
       await this.getMqttCredentials();
       //ex topic: "userid/did/variableId/sdata"
@@ -173,6 +196,8 @@ export default {
       }
       //MQTT CONNECTION SUCCESS
       this.client.on("connect", () => {
+        console.log(this.client);
+
         console.log("Connection succeeded!");
         //SDATA SUBSCRIBE
         this.client.subscribe(deviceSubscribeTopic, { qos: 0 }, err => {
@@ -198,6 +223,10 @@ export default {
       });
       this.client.on("reconnect", error => {
         console.log("reconnecting:", error);
+        this.getMqttCredentialsForReconnection();
+      });
+      this.client.on("disconnect", error => {
+        console.log("MQTT disconnect EVENT FIRED:", error);
       });
       this.client.on("message", (topic, message) => {
         console.log("Message from topic " + topic + " -> ");
@@ -221,12 +250,10 @@ export default {
           console.log(error);
         }
       });
-
       $nuxt.$on("mqtt-sender", toSend => {
         this.client.publish(toSend.topic, JSON.stringify(toSend.msg));
       });
     },
-
     toggleSidebar() {
       if (this.$sidebar.showSidebar) {
         this.$sidebar.displaySidebar(false);
