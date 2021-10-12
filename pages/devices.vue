@@ -82,6 +82,8 @@
 
           <el-table-column prop="dId" label="Device Id"></el-table-column>
 
+          <el-table-column prop="password" label="Password"></el-table-column>
+
           <el-table-column
             prop="templateName"
             label="Template"
@@ -162,16 +164,14 @@ export default {
     };
   },
   mounted() {
-    
     this.getTemplates();
   },
   methods: {
     updateSaverRuleStatus(rule) {
-      
       var ruleCopy = JSON.parse(JSON.stringify(rule));
       ruleCopy.status = !ruleCopy.status;
-      const toSend = { 
-        rule: ruleCopy 
+      const toSend = {
+        rule: ruleCopy
       };
       const axiosHeaders = {
         headers: {
@@ -360,7 +360,7 @@ export default {
             message: " Error deleting " + device.name
           });
         });
-    },
+    }
   }
 };
 </script>

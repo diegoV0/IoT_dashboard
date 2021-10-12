@@ -9,7 +9,7 @@ const axios = require("axios");
 import Device from "../models/device.js";
 import SaverRule from "../models/emqx_saver_rule.js";
 import Template from "../models/template.js";
-import AlarmRule  from "../models/emqx_alarm_rule.js";
+import AlarmRule from "../models/emqx_alarm_rule.js";
 
 /*----------------------------------------------------------
                            API
@@ -37,9 +37,15 @@ router.get("/device", checkAuth, async (req, res) => {
     const alarmRules = await getAlarmRules(userId);
     //saver rules to -> devices
     devices.forEach((device, index) => {
-      devices[index].saverRule = saverRules.filter(saverRule => saverRule.dId == device.dId)[0];
-      devices[index].template = templates.filter(template => template._id == device.templateId)[0];
-      devices[index].alarmRules = alarmRules.filter(alarmRule => alarmRule.dId == device.dId);
+      devices[index].saverRule = saverRules.filter(
+        saverRule => saverRule.dId == device.dId
+      )[0];
+      devices[index].template = templates.filter(
+        template => template._id == device.templateId
+      )[0];
+      devices[index].alarmRules = alarmRules.filter(
+        alarmRule => alarmRule.dId == device.dId
+      );
     });
     const toSend = {
       status: "success",
@@ -63,6 +69,7 @@ router.post("/device", checkAuth, async (req, res) => {
     var newDevice = req.body.newDevice;
     newDevice.userId = userId;
     newDevice.createdTime = Date.now();
+    newDevice.password = makeid(10);
     await createSaverRule(userId, newDevice.dId, true);
     const device = await Device.create(newDevice);
     await selectDevice(userId, newDevice.dId);
@@ -123,10 +130,10 @@ router.put("/device", checkAuth, async (req, res) => {
 });
 
 //SAVER-RULE STATUS UPDATER
-router.put('/saver-rule', checkAuth, async (req, res) => {
+router.put("/saver-rule", checkAuth, async (req, res) => {
   const rule = req.body.rule;
-  console.log(rule)
-  await updateSaverRuleStatus(rule.emqxRuleId, rule.status)
+  console.log(rule);
+  await updateSaverRuleStatus(rule.emqxRuleId, rule.status);
   const toSend = {
     status: "success"
   };
@@ -156,14 +163,14 @@ async function selectDevice(userId, dId) {
 
 async function getAlarmRules(userId) {
   try {
-      const rules = await AlarmRule.find({ userId: userId });
-      return rules;
+    const rules = await AlarmRule.find({ userId: userId });
+    return rules;
   } catch (error) {
-      return "error";
+    return "error";
   }
 }
 
- // SAVER RULES FUNCTIONS
+// SAVER RULES FUNCTIONS
 
 //get templates from a user
 async function getTemplates(userId) {
@@ -200,7 +207,9 @@ async function createSaverRule(userId, dId, status) {
           params: {
             $resource: global.saverResource.id,
             payload_tmpl:
-              '{"userId":"' + userId + '","payload":${payload},"topic":"${topic}"}'
+              '{"userId":"' +
+              userId +
+              '","payload":${payload},"topic":"${topic}"}'
           }
         }
       ],
@@ -258,6 +267,18 @@ async function deleteSaverRule(dId) {
     console.log(error);
     return false;
   }
+}
+
+//make ID
+function makeid(length) {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 }
 
 module.exports = router;
